@@ -50,6 +50,7 @@ The board includes its own **Agent** view (`Backlog Board: Open agent panel`, or
 - **Targets** (`Where the text goes`):
   - **Agent panel** (default): opens the built-in ACP panel beside the board, streams the agent's words and tool calls, and asks one-time `Allow` / `Reject` for permission requests (`allow_always` is never surfaced as a shortcut). Each agent keeps its own session while Obsidian is open; switching agents in the panel's picker preserves each conversation.
   - **Terminal (Termy)**, **Claudian chat**, or **Copy**: alternative targets if you prefer an external terminal plugin, Claudian, or the clipboard.
+- **Notifications** (0.4.0): while Obsidian is not in front, a system notification says when the agent in the panel has finished, stopped with an error, or asks for permission; clicking it brings the panel back. A setting turns it off.
 - **Action buttons**: configure `Day actions`, `Active task actions`, and `Ready task actions` as `Label = command [args]` (supporting `{id}`, `{step}`, `{title}`, `{path}`). "Work with the agent" uses the `Text sent to the AI` template.
 
 ## What it writes

@@ -70,6 +70,7 @@ const DEFAULT_SETTINGS = {
   agent: '',
   target: 'panel',
   askBeforeSending: true,
+  notifyAgent: true,
   commandsFolder: '.claude/commands',
   dayActions: '',
   activeActions: '',
@@ -279,6 +280,10 @@ const STRINGS = {
     agentToolSearch: 'Search',
     agentToolOther: 'Tool',
     setAsk: 'Ask before sending to the terminal',
+    setNotify: 'Notify when the agent finishes or asks, while Obsidian is not in front',
+    notifyDone: 'The agent has finished',
+    notifyAsks: 'The agent asks for permission',
+    notifyFailed: 'The agent stopped with an error',
     setCommands: 'Commands folder',
     setCommandsDesc: 'For an agent marked "| file": it is told to follow <folder>/<command>.md.',
     setDayActions: 'Buttons of the day (Now)',
@@ -486,6 +491,10 @@ const STRINGS = {
     agentToolSearch: 'Qidirish',
     agentToolOther: 'Amal',
     setAsk: 'Terminalga yuborishdan oldin so\'rash',
+    setNotify: 'Agent tugatganda yoki ruxsat so\'raganda xabar berish (Obsidian oldinda bo\'lmasa)',
+    notifyDone: 'Agent tugatdi',
+    notifyAsks: 'Agent ruxsat so\'rayapti',
+    notifyFailed: 'Agent xato bilan to\'xtadi',
     setCommands: 'Buyruqlar papkasi',
     setCommandsDesc: '"| file" belgili agentga <papka>/<buyruq>.md dagi ko\'rsatmaga amal qilish aytiladi.',
     setDayActions: 'Kun tugmalari ("Hozir")',
@@ -2973,6 +2982,12 @@ class BoardSettingTab extends PluginSettingTab {
         await save();
       }),
     );
+    new Setting(containerEl).setName(t('setNotify')).addToggle((toggle) =>
+      toggle.setValue(plugin.settings.notifyAgent).onChange(async (value) => {
+        plugin.settings.notifyAgent = value;
+        await save();
+      }),
+    );
     text('commandsFolder', 'setCommands', 'setCommandsDesc', '.claude/commands');
     for (const [key, name, placeholder] of [
       ['dayActions', 'setDayActions', 'Start the day = start-day'],
@@ -3585,6 +3600,7 @@ class BacklogBoardPlugin extends Plugin {
     const rejectOpt = options.find((o) => o.kind === 'reject_once') || options.find((o) => String(o.kind || '').startsWith('reject'));
     const toolCall = (params && params.toolCall) || {};
     const title = toolCall.title || toolCall.toolCallId || this.t('agentPermLabel');
+    this.notifyAgent(this.t('notifyAsks'), title);
     return new Promise((resolve) => {
       session.pendingPermission = {
         title,
@@ -3694,12 +3710,30 @@ class BacklogBoardPlugin extends Plugin {
       await client.prompt(text);
       session.status = 'idle';
       this.refreshAgentViews();
+      this.notifyAgent(this.t('notifyDone'), agent.name);
       return true;
     } catch (error) {
       session.status = 'error';
       session.items.push({ kind: 'error', text: String((error && error.message) || error) });
       this.refreshAgentViews();
+      this.notifyAgent(this.t('notifyFailed'), String((error && error.message) || error));
       return false;
+    }
+  }
+
+  // A system notification, only while Obsidian is not in front: in front, the panel shows it.
+  notifyAgent(title, body) {
+    if (!this.settings.notifyAgent || typeof Notification === 'undefined') return;
+    if (typeof document !== 'undefined' && document.hasFocus()) return;
+    try {
+      const vault = typeof this.app.vault.getName === 'function' ? this.app.vault.getName() : '';
+      const note = new Notification(vault ? `${title} · ${vault}` : title, { body: body || '' });
+      note.onclick = () => {
+        if (typeof window !== 'undefined') window.focus();
+        this.activateAgentView(true);
+      };
+    } catch (error) {
+      console.warn('[backlog-board] the notification could not be shown', error);
     }
   }
 
