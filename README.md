@@ -1,20 +1,29 @@
 # Loyiha starter — Obsidian + Backlog Board + AI agent
 
-Bu papkani kompyuteringizdagi istalgan doimiy joyga (masalan, `C:\D\Projects\starter`) nusxalab qo'ying. Shundan keyin har qanday **yangi** yoki **yurib turgan** loyihani 2 qadamda shu tizimga ulaysiz:
+Har qanday **yangi** yoki **yurib turgan** loyihani bitta buyruq bilan shu tizimga ulaydi.
 
-1. **Loyihaga o'rnatish (1 buyruq):**
-   ```powershell
-   node C:\D\Projects\starter\setup.mjs C:\D\Projects\loyiha-nomi
-   ```
-   *(Ixtiyoriy: `--name "Loyiha nomi"` berishingiz mumkin. Mavjud fayllaringiz — masalan, oldindan bor `CLAUDE.md` yoki `community-plugins.json` — o'chirilmaydi.)*
+### 1. Onlayn (istalgan kompyuterda)
+- **Loyihaga o'rnatish:**
+  ```powershell
+  npx github:obidovbek/backlog-starter C:\D\Projects\loyiha-nomi
+  ```
+  *(Loyiha papkasida turgan bo'lsangiz, yo'l o'rniga `.` yozing. Ixtiyoriy: `--name "Loyiha nomi"`. Mavjud `CLAUDE.md`, `.gitignore`, `community-plugins.json` ga tegmaydi.)*
+- **Bitta loyihada pluginni yangilash** (`data.json` sozlamalariga tegmasdan):
+  ```powershell
+  npx github:obidovbek/backlog-starter C:\D\Projects\loyiha-nomi --update-plugin
+  ```
+- **Bir papkadagi barcha loyihalarda pluginni yangilash:**
+  ```powershell
+  npx github:obidovbek/backlog-starter --update-all C:\D\Projects
+  ```
 
-2. **Obsidian'da ochish:**
-   - **Open folder as vault** → `C:\D\Projects\loyiha-nomi` (`Backlog Board` plugini avtomatik yoqilgan bo'ladi).
-   - `Ctrl+P` → **`Backlog Board: Doskani agent bilan ochish`** (chapda doska, o'ngda ACP agent paneli).
-
-Keyinchalik faqat plugin kodini yangilash uchun (`data.json` sozlamalariga tegmasdan):
+### 2. Mahalliy (internetsiz)
 ```powershell
-node C:\D\Projects\starter\setup.mjs C:\D\Projects\loyiha-nomi --update-plugin
+node C:\D\Projects\backlog-starter\setup.mjs C:\D\Projects\loyiha-nomi
 ```
 
-> Yurib turgan loyiha uchun `CLAUDE.md` ga loyihaning qisqa tavsifi va test/run buyruqlarini yozing, hamda `backlog task create "..."` bilan faqat oldinda turgan 3–10 ta real vazifani qo'shing.
+### 3. Obsidian'da ochish
+- **Open folder as vault** → loyiha papkasi (`Backlog Board` yoqilgan bo'ladi).
+- `Ctrl+P` → **`Backlog Board: Doskani agent bilan ochish`** (chapda doska, o'ngda agent paneli).
+
+> Yurib turgan loyiha uchun `CLAUDE.md` ga qisqa tavsif va test/run buyruqlarini yozing, hamda `backlog task create "..."` bilan faqat oldinda turgan 3–10 ta real vazifani qo'shing.

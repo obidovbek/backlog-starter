@@ -1,0 +1,9 @@
+{
+  "name": "backlog-starter",
+  "version": "0.3.0",
+  "description": "One-command Obsidian + Backlog.md + Backlog Board ACP agent starter",
+  "type": "module",
+  "bin": {
+    "backlog-starter": "./setup.mjs"
+  }
+}

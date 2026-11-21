@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,17 +12,21 @@ const GITIGNORE_ENTRIES = ['.obsidian/workspace*.json', '.obsidian/cache'];
 function printUsage() {
   console.log(`Usage:
   node setup.mjs <target-folder> [--name "Project Name"] [--update-plugin]
+  node setup.mjs --update-all <projects-root>
 
 Options:
-  --name <name>     Project name for CLAUDE.md and backlog/config.yml (defaults to folder name)
-  --update-plugin   Only update Backlog Board plugin code (keeps data.json and project files)
-  -h, --help        Show this help`);
+  --name <name>           Project name for CLAUDE.md and backlog/config.yml (defaults to folder name)
+  --update-plugin         Only update Backlog Board plugin code in <target-folder> (keeps data.json)
+  --update-all <root>     Update Backlog Board plugin code in all projects under <root>
+  -h, --help              Show this help`);
 }
 
 function parseArgs(argv) {
   let target = null;
   let name = null;
   let updatePlugin = false;
+  let updateAll = null;
+  let updateAllFlag = false;
   let help = false;
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -30,6 +35,14 @@ function parseArgs(argv) {
       help = true;
     } else if (arg === '--update-plugin') {
       updatePlugin = true;
+    } else if (arg === '--update-all') {
+      updateAllFlag = true;
+      if (i + 1 < argv.length && !argv[i + 1].startsWith('-')) {
+        updateAll = argv[++i];
+      }
+    } else if (arg.startsWith('--update-all=')) {
+      updateAllFlag = true;
+      updateAll = arg.slice('--update-all='.length);
     } else if (arg === '--name') {
       if (i + 1 >= argv.length) {
         throw new Error('--name requires a value');
@@ -45,7 +58,11 @@ function parseArgs(argv) {
       throw new Error(`Unexpected argument: ${arg}`);
     }
   }
-  return { target, name, updatePlugin, help };
+  if (updateAllFlag && updateAll === null) {
+    updateAll = target;
+    target = null;
+  }
+  return { target, name, updatePlugin, updateAllFlag, updateAll, help };
 }
 
 function walkFiles(dir, prefix = '') {
@@ -60,6 +77,16 @@ function walkFiles(dir, prefix = '') {
     }
   }
   return out;
+}
+
+function updatePluginIn(projectDir) {
+  const srcPlugin = path.join(templateDir, '.obsidian', 'plugins', 'backlog-board');
+  const dstPlugin = path.join(projectDir, '.obsidian', 'plugins', 'backlog-board');
+  fs.mkdirSync(dstPlugin, { recursive: true });
+  for (const name of PLUGIN_FILES) {
+    fs.copyFileSync(path.join(srcPlugin, name), path.join(dstPlugin, name));
+  }
+  return dstPlugin;
 }
 
 function mergeCommunityPlugins(targetDir) {
@@ -96,9 +123,35 @@ function mergeGitignore(targetDir) {
 
 function main() {
   const parsed = parseArgs(process.argv.slice(2));
-  if (parsed.help || parsed.target === null) {
+  if (parsed.help || (!parsed.updateAllFlag && parsed.target === null) || (parsed.updateAllFlag && !parsed.updateAll)) {
     printUsage();
     process.exit(parsed.help ? 0 : 1);
+  }
+
+  if (parsed.updateAllFlag) {
+    const rootDir = path.resolve(parsed.updateAll);
+    if (!fs.existsSync(rootDir) || !fs.statSync(rootDir).isDirectory()) {
+      throw new Error(`Directory not found: ${rootDir}`);
+    }
+    const resolvedStarter = path.resolve(starterDir);
+    let updated = 0;
+    for (const entry of fs.readdirSync(rootDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const subDir = path.join(rootDir, entry.name);
+      if (path.resolve(subDir) === resolvedStarter) continue;
+      const pluginDir = path.join(subDir, '.obsidian', 'plugins', 'backlog-board');
+      if (fs.existsSync(pluginDir) && fs.statSync(pluginDir).isDirectory()) {
+        updatePluginIn(subDir);
+        console.log(`Yangilandi: ${entry.name}`);
+        updated += 1;
+      }
+    }
+    if (updated === 0) {
+      console.log(`Backlog Board o'rnatilgan loyiha topilmadi: ${rootDir}`);
+    } else {
+      console.log(`Jami ${updated} ta loyihada Backlog Board plugini yangilandi (data.json saqlab qolindi).`);
+    }
+    return;
   }
 
   const targetDir = path.resolve(parsed.target);
@@ -106,12 +159,7 @@ function main() {
   fs.mkdirSync(targetDir, { recursive: true });
 
   if (parsed.updatePlugin) {
-    const srcPlugin = path.join(templateDir, '.obsidian', 'plugins', 'backlog-board');
-    const dstPlugin = path.join(targetDir, '.obsidian', 'plugins', 'backlog-board');
-    fs.mkdirSync(dstPlugin, { recursive: true });
-    for (const name of PLUGIN_FILES) {
-      fs.copyFileSync(path.join(srcPlugin, name), path.join(dstPlugin, name));
-    }
+    const dstPlugin = updatePluginIn(targetDir);
     console.log(`Backlog Board plugini yangilandi: ${dstPlugin} (data.json saqlab qolindi).`);
     return;
   }
