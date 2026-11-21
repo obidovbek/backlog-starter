@@ -1,0 +1,9 @@
+{
+  "id": "backlog-board",
+  "name": "Backlog Board",
+  "version": "0.3.0",
+  "minAppVersion": "1.4.0",
+  "description": "Now, board, plan, list, docs and statistics over Backlog.md task files, inside Obsidian.",
+  "author": "obidovbek",
+  "isDesktopOnly": false
+}

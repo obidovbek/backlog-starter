@@ -1,0 +1,20 @@
+{
+  "language": "uz",
+  "blockedStatuses": "",
+  "lockedStatuses": "Locked",
+  "foldStatuses": "Locked, Done",
+  "me": "@bekzod",
+  "cardLabels": false,
+  "displayNames": "Locked = Qulflangan\nTo Do = Navbatda\nIn Progress = Jarayonda\nDone = Tayyor\nHigh = Yuqori\nMedium = O'rta\nLow = Past",
+  "decisionFolders": "docs/decisions",
+  "notesFolder": "notes",
+  "agents": "Claude Code = npx -y @agentclientprotocol/claude-agent-acp@0.109.0",
+  "agent": "Claude Code",
+  "target": "panel",
+  "askBeforeSending": true,
+  "commandsFolder": ".claude/commands",
+  "dayActions": "Kunni boshlash = start-day\nKunni yopish = end-day",
+  "activeActions": "Keyingi qadam = next",
+  "readyActions": "Ochish = new-task {id}",
+  "whoMarks": "🧑 = siz\n🤖 = agent"
+}
