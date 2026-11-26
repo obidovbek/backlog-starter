@@ -2127,13 +2127,13 @@ class BoardView extends ItemView {
     const box = row.createEl('input', { type: 'checkbox' });
     box.checked = item.checked;
     box.addEventListener('change', () => this.plugin.toggleItem(task.path, block, item.index, box.checked));
-    // The sub-step in plain words, when the plain-words file of the task has a line for it: a "?" before the
+    // The sub-step in plain words, when the plain-words file of the task has a line for it: a "?" after the
     // text shows it on hover, and a click puts it under the sub-step (for a touch screen).
-    const help = row.createSpan({ cls: 'bb-check-help', text: '?' });
-    help.hide();
     const { who, text } = splitWho(item.text, parseNames(this.plugin.settings.whoMarks));
     const body = row.createDiv({ cls: 'bb-check-text' });
     renderMarkdown(this.app, text, body, task.path, this);
+    const help = row.createSpan({ cls: 'bb-check-help', text: '?' });   // to the right of the text
+    help.hide();
     if (block === 'AC') {
       this.plugin.plainWords(task.id, item.index).then((plain) => {
         if (!plain || !help.isConnected) return;
