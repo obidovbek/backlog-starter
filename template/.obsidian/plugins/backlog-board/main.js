@@ -155,7 +155,7 @@ const STRINGS = {
     tick: 'Tick',
     thenWord: 'Then:',
     setWho: 'Who marks',
-    setWhoDesc: 'One per line, "mark = word": a mark at the start of a sub-step (such as 🧑 or 🤖) is shown as the word.',
+    setWhoDesc: 'One per line, "mark = word": a mark at the start of a sub-step (such as @bekzod or @claude) is shown as the word.',
     wholeLog: (count) => `All ${count} lines`,
     statsDone: 'Done, of the steps not locked',
     statsLocked: (count) => `${count} locked steps are not counted.`,
@@ -366,7 +366,7 @@ const STRINGS = {
     tick: 'Belgilash',
     thenWord: 'Keyin:',
     setWho: 'Kim belgilari',
-    setWhoDesc: 'Har qatorda bittasi, "belgi = so\'z": qadam boshidagi belgi (masalan 🧑 yoki 🤖) so\'z bilan ko\'rsatiladi.',
+    setWhoDesc: 'Har qatorda bittasi, "belgi = so\'z": qadam boshidagi belgi (masalan @bekzod yoki @claude) so\'z bilan ko\'rsatiladi.',
     wholeLog: (count) => `hammasi (${count})`,
     statsDone: 'Bajarildi (qulflanmaganlardan)',
     statsLocked: (count) => `${count} ta qulflangan qadam hisobga olinmagan.`,
@@ -1021,15 +1021,15 @@ function parseNames(text) {
   return names;
 }
 
-// The marks at the start of a sub-step that say who does it ("🧑 = you", "🤖 = agent" in the
-// settings), taken off and given back as words.
+// The marks at the start of a sub-step that say who does it ("@bekzod = you", "@claude = agent"
+// in the settings), taken off and given back as words. Upper and lower case count as the same.
 function splitWho(text, marks) {
   const who = [];
   let rest = String(text || '').trim();
   for (let found = true; found && marks.size; ) {
     found = false;
     for (const [mark, word] of marks) {
-      if (mark && rest.startsWith(mark)) {
+      if (mark && rest.toLowerCase().startsWith(mark)) {
         who.push(word);
         rest = rest.slice(mark.length).trim();
         found = true;
@@ -2935,7 +2935,7 @@ class BoardSettingTab extends PluginSettingTab {
       .setDesc(t('setWhoDesc'))
       .setClass('bb-stack')
       .addTextArea((area) => {
-        area.setPlaceholder('🧑 = you\n🤖 = agent').setValue(plugin.settings.whoMarks).onChange(async (value) => {
+        area.setPlaceholder('@bekzod = you\n@claude = agent').setValue(plugin.settings.whoMarks).onChange(async (value) => {
           plugin.settings.whoMarks = value;
           await save();
         });

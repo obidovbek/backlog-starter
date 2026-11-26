@@ -7,5 +7,5 @@ Task: $ARGUMENTS
 
 1. Find the task (`backlog task list --plain`) or create it (`backlog task create "<title>" -a @claude`).
 2. Check its dependencies are `Done` and it is not `Locked`.
-3. Break it into small, practical sub-steps (`backlog task edit <id> --ac "<sub-step>"`), keeping the solution simple and working.
+3. Break it into small, practical sub-steps (`backlog task edit <id> --ac "<sub-step>"`), each starting with who does it (`@bekzod`, `@claude`, or `@bekzod @claude`; no icons), keeping the solution simple and working.
 4. Show the sub-steps and wait for an ok before setting `-s "In Progress"` and writing code (one task `In Progress` at a time).

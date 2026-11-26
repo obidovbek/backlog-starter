@@ -16,5 +16,5 @@
   "dayActions": "Kunni boshlash = start-day\nKunni yopish = end-day",
   "activeActions": "Keyingi qadam = next",
   "readyActions": "Ochish = new-task {id}",
-  "whoMarks": "🧑 = siz\n🤖 = agent"
+  "whoMarks": "@bekzod = siz\n@claude = agent"
 }
