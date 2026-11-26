@@ -64,6 +64,7 @@ const DEFAULT_SETTINGS = {
   logLines: 8,
   displayNames: '',
   notesFolder: 'notes',
+  plainFolder: 'backlog/plain',
   decisionFolders: '',
   aiPrompt: DEFAULT_PROMPT,
   agents: DEFAULT_AGENTS,
@@ -241,6 +242,9 @@ const STRINGS = {
     setLogLines: 'Lines of the work log shown in the Now tab',
     setNames: 'Names shown',
     setNamesDesc: 'One per line, "Original = Shown", for statuses and priorities. Files keep the original.',
+    setPlain: 'Plain-words folder',
+    setPlainDesc: 'One file per task (task-12.md) with a line per sub-step, "#1 what it means in plain words". A sub-step that has a line gets a "?" that shows it.',
+    plainHelp: 'In plain words',
     setNotes: 'Notes folder',
     setNotesDesc: 'Where "+ New note" creates a note linked to a task.',
     setDecisions: 'More decision folders',
@@ -452,6 +456,9 @@ const STRINGS = {
     setLogLines: "\"Hozir\" bo'limida ish logining nechta qatori ko'rinadi",
     setNames: "Ko'rinadigan nomlar",
     setNamesDesc: 'Har qatorda bittadan, "Asl = Ko\'rinadigan", status va muhimliklar uchun. Fayllarda asl nom qoladi.',
+    setPlain: 'Sodda tushuntirishlar papkasi',
+    setPlainDesc: 'Har bir ish uchun bitta fayl (task-12.md), har qadamga bir qator: "#1 sodda tilda nima degani". Qatori bor qadam oldida "?" chiqadi va shu qatorni beradi.',
+    plainHelp: 'Sodda tilda',
     setNotes: 'Eslatmalar papkasi',
     setNotesDesc: '"+ Yangi eslatma" qadamga bog\'langan eslatmani shu yerda yaratadi.',
     setDecisions: "Qo'shimcha qarorlar papkalari",
@@ -2120,8 +2127,25 @@ class BoardView extends ItemView {
     const box = row.createEl('input', { type: 'checkbox' });
     box.checked = item.checked;
     box.addEventListener('change', () => this.plugin.toggleItem(task.path, block, item.index, box.checked));
+    // The sub-step in plain words, when the plain-words file of the task has a line for it: a "?" before the
+    // text shows it on hover, and a click puts it under the sub-step (for a touch screen).
+    const help = row.createSpan({ cls: 'bb-check-help', text: '?' });
+    help.hide();
     const { who, text } = splitWho(item.text, parseNames(this.plugin.settings.whoMarks));
-    renderMarkdown(this.app, text, row.createDiv({ cls: 'bb-check-text' }), task.path, this);
+    const body = row.createDiv({ cls: 'bb-check-text' });
+    renderMarkdown(this.app, text, body, task.path, this);
+    if (block === 'AC') {
+      this.plugin.plainWords(task.id, item.index).then((plain) => {
+        if (!plain || !help.isConnected) return;
+        help.show();
+        help.setAttr('aria-label', plain);
+        help.addEventListener('click', () => {
+          const shown = body.querySelector('.bb-check-plain');
+          if (shown) shown.remove();
+          else body.createDiv({ cls: 'bb-check-plain', text: `${this.t('plainHelp')}: ${plain}` });
+        });
+      });
+    }
     if (who.length) row.createSpan({ cls: 'bb-check-who', text: who.join(` ${this.t('and')} `) });
     if (editable) {
       const tools = row.createDiv({ cls: 'bb-check-tools' });
@@ -2942,6 +2966,7 @@ class BoardSettingTab extends PluginSettingTab {
         area.inputEl.rows = 2;
       });
     text('notesFolder', 'setNotes', 'setNotesDesc', 'notes');
+    text('plainFolder', 'setPlain', 'setPlainDesc', 'backlog/plain');
     text('decisionFolders', 'setDecisions', 'setDecisionsDesc', 'docs/decisions');
 
     new Setting(containerEl).setName(t('setAgentHeading')).setHeading();
@@ -3285,6 +3310,19 @@ class BacklogBoardPlugin extends Plugin {
         return statusChanges ? touch(next) : next;
       });
     }
+  }
+
+  // The plain words of one sub-step: line "#<n> ..." of <plain-words folder>/<task id>.md, or '' when there is none.
+  async plainWords(taskId, index) {
+    const folder = normalizePath(String(this.settings.plainFolder || '').trim() || 'backlog/plain');
+    const file = this.app.vault.getAbstractFileByPath(`${folder}/${String(taskId).toLowerCase()}.md`);
+    if (!file || file.children) return '';
+    const lines = (await this.app.vault.cachedRead(file)).split(/\r?\n/);
+    for (const line of lines) {
+      const match = /^\s*(?:[-*]\s*)?#(\d+)[\s:.)-]+(.+)$/.exec(line);
+      if (match && Number(match[1]) === Number(index)) return match[2].trim();
+    }
+    return '';
   }
 
   setStatus(path, status) {

@@ -1481,6 +1481,33 @@
   cursor: pointer;
 }
 
+.bb-check-help {
+  flex: none;
+  width: 1.3em;
+  height: 1.3em;
+  margin-right: 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.2em;
+  text-align: center;
+  cursor: help;
+}
+
+.bb-check-help:hover {
+  color: var(--text-accent);
+  border-color: var(--text-accent);
+}
+
+.bb-check-plain {
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-left: 2px solid var(--text-accent);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
 .bb-check-who {
   flex: none;
   margin-left: 8px;

@@ -92,6 +92,7 @@ Only through the Backlog.md format, editing the lines concerned and nothing else
 | Lines of the work log | 8 | How much of the log the Now tab shows |
 | Names shown | empty | `Original = Shown`, one per line, for statuses and priorities; files keep the original |
 | Notes folder | `notes` | Where "+ New note" puts a note linked to a task |
+| Plain-words folder | `backlog/plain` | One file per task (`task-12.md`) with a line per sub-step, `#1 what it means in plain words`; a sub-step that has a line gets a "?" that shows it on hover or click |
 | More decision folders | empty | Comma-separated folders listed with the decisions, e.g. `docs/decisions` |
 | Agents | `Claude Code = npx -y @agentclientprotocol/claude-agent-acp@0.109.0` (for ACP panel) or `Claude Code = claude` (for terminal) | One per line: `Name = command` (add `\| file` for agents without slash commands) |
 | Agent | first in list | Active agent used by buttons and the Agent panel |
